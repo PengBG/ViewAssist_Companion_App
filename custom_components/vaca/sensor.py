@@ -198,8 +198,7 @@ class WyomingSatelliteOrientationSensor(VASatelliteEntity, RestoreSensor):
     """Entity to represent orientation sensor for satellite."""
 
     entity_description = SensorEntityDescription(
-        key="orientation",
-        translation_key="orientation",
+        key="orientation", translation_key="orientation", icon="mdi:screen-rotation"
     )
     _attr_native_value = UNKNOWN
 
