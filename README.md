@@ -69,6 +69,8 @@ You will notice on some devices that the audio level seems very low (in the 0.00
 
 Once the wake word is detected, VACA switches into STT mode to stream audio over the network to HA and you will see a significant jump in the audio level (in the 1.x to 5.x range). This is where the auto gain function has kicked in to boost the audio level (to try and be consistent no matter the device) and improve the command interpretation by your chosen STT engine. The mic gain setting is in effect here. You should expect this level to be in the high 2.x to 3.x range with gain at 0. Dropping to 1.x at -10 and increasing to 4-5.x at +10.
 
+So, why not boost the audio level for wake word detection? Well, very good question. And the answer is, we tried that and it actually made it worse in real world testing, so we removed it.
+
 ### Wake word prediction
 
 This is the wake word engine's level of confidence that the audio heard was the wake word when in wake word listening mode. In the settings, there is a wake word threshold setting, which directly relates to this prediciton number. Ie, once this prediction number is greater than the threshold level, it will class that as a wake word detection.
