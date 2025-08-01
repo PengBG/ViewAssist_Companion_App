@@ -53,7 +53,7 @@ As is common with new custom integrations, it can take a little while to be full
 
 The app is not currently available in the Play store and will need to be downloaded from the apk folder in this repository and installed on your device.
 
-# Diagnostics Overlay
+# Diagnostics Overlay (v0.3.4 and above)
 
 We have added an experimental feature in v0.3.4 to provide an overlay on the screen, displaying microphone audio level and wake word prediction value to aide with voice issues - be it not hearing wake word, too many false positives, poor interpretation of commands or just pure geeky interest!
 
