@@ -30,6 +30,11 @@
                 "name": "Assist in progress"
             }
         },
+        "button": {
+            "wake": {
+                "name": "Wake"
+            }
+        },
         "media_player": {
             "name": "Media Player",
             "state": {
@@ -137,6 +142,9 @@
             },
             "dark_mode": {
                 "name": "Dark mode"
+            },
+            "diagnostics_enabled": {
+                "name": "On screen diagnostics"
             }
         }
     }
