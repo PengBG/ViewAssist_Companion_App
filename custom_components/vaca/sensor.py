@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.sensor import RestoreSensor, SensorEntityDescription
 from homeassistant.components.sensor.const import SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import LIGHT_LUX
+from homeassistant.const import LIGHT_LUX, PERCENTAGE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -36,15 +36,19 @@ async def async_setup_entry(
     # Setup is only forwarded for satellites
     assert item.device is not None
 
-    async_add_entities(
-        [
-            WyomingSatelliteSTTSensor(item.device),
-            WyomingSatelliteTTSSensor(item.device),
-            WyomingSatelliteIntentSensor(item.device),
-            WyomingSatelliteLightSensor(item.device),
-            WyomingSatelliteOrientationSensor(item.device),
-        ]
-    )
+    entities = [
+        WyomingSatelliteSTTSensor(item.device),
+        WyomingSatelliteTTSSensor(item.device),
+        WyomingSatelliteIntentSensor(item.device),
+        WyomingSatelliteLightSensor(item.device),
+        WyomingSatelliteOrientationSensor(item.device),
+    ]
+
+    if item.device.capabilities and item.device.capabilities.get("has_battery"):
+        entities.append(WyomingSatelliteBatteryLevelSensor(item.device))
+        entities.append(WyomingSatelliteBatteryChargingSensor(item.device))
+
+    async_add_entities(entities)
 
 
 class WyomingSatelliteSTTSensor(VASatelliteEntity, RestoreSensor):
@@ -157,15 +161,9 @@ class WyomingSatelliteIntentSensor(VASatelliteEntity, RestoreSensor):
             return None
 
 
-class WyomingSatelliteLightSensor(VASatelliteEntity, RestoreSensor):
-    """Entity to represent light sensor for satellite."""
+class _WyomingSatelliteDeviceSensorBase(VASatelliteEntity, RestoreSensor):
+    """Base class for device sensors."""
 
-    entity_description = SensorEntityDescription(
-        key="light",
-        translation_key="light_level",
-        device_class=SensorDeviceClass.ILLUMINANCE,
-        native_unit_of_measurement=LIGHT_LUX,
-    )
     _attr_native_value = 0
 
     async def async_added_to_hass(self) -> None:
@@ -185,44 +183,68 @@ class WyomingSatelliteLightSensor(VASatelliteEntity, RestoreSensor):
             )
         )
 
+    def _get_native_value(self, value: Any) -> Any:
+        """Get the native value from the data."""
+        if isinstance(value, (int, float)):
+            return value
+        if isinstance(value, str):
+            if value.isdigit():
+                return int(value)
+            return value
+        return value
+
     @callback
     def status_update(self, data: dict[str, Any]) -> None:
         """Update entity."""
         if sensors := data.get("sensors"):
             if self.entity_description.key in sensors:
-                self._attr_native_value = int(sensors[self.entity_description.key])
+                self._attr_native_value = self._get_native_value(
+                    sensors[self.entity_description.key]
+                )
                 self.async_write_ha_state()
 
 
-class WyomingSatelliteOrientationSensor(VASatelliteEntity, RestoreSensor):
+class WyomingSatelliteLightSensor(_WyomingSatelliteDeviceSensorBase):
+    """Entity to represent light sensor for satellite."""
+
+    entity_description = SensorEntityDescription(
+        key="light",
+        translation_key="light_level",
+        device_class=SensorDeviceClass.ILLUMINANCE,
+        native_unit_of_measurement=LIGHT_LUX,
+    )
+
+
+class WyomingSatelliteOrientationSensor(_WyomingSatelliteDeviceSensorBase):
     """Entity to represent orientation sensor for satellite."""
 
+    _attr_native_value = UNKNOWN
     entity_description = SensorEntityDescription(
         key="orientation", translation_key="orientation", icon="mdi:screen-rotation"
     )
+
+
+class WyomingSatelliteBatteryLevelSensor(_WyomingSatelliteDeviceSensorBase):
+    """Entity to represent battery level sensor for satellite."""
+
+    entity_description = SensorEntityDescription(
+        key="battery_level",
+        translation_key="battery_level",
+        device_class=SensorDeviceClass.BATTERY,
+        native_unit_of_measurement=PERCENTAGE,
+    )
+
+
+class WyomingSatelliteBatteryChargingSensor(_WyomingSatelliteDeviceSensorBase):
+    """Entity to represent battery charging sensor for satellite."""
+
     _attr_native_value = UNKNOWN
+    entity_description = SensorEntityDescription(
+        key="battery_charging",
+        translation_key="battery_charging",
+        icon="mdi:battery-charging",
+    )
 
-    async def async_added_to_hass(self) -> None:
-        """Call when entity about to be added to hass."""
-        await super().async_added_to_hass()
-
-        state = await self.async_get_last_state()
-        if state is not None:
-            self._attr_native_value = state.state
-            self.async_write_ha_state()
-
-        self.async_on_remove(
-            async_dispatcher_connect(
-                self.hass,
-                f"{DOMAIN}_{self._device.device_id}_status_update",
-                self.status_update,
-            )
-        )
-
-    @callback
-    def status_update(self, data: dict[str, Any]) -> None:
-        """Update entity."""
-        if sensors := data.get("sensors"):
-            if self.entity_description.key in sensors:
-                self._attr_native_value = sensors[self.entity_description.key]
-                self.async_write_ha_state()
+    def _get_native_value(self, value: Any) -> Any:
+        """Get the native value from the data."""
+        return "not_charging" if int(value) == 0 else "charging"

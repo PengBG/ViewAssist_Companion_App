@@ -122,6 +122,16 @@
                     "portrait": "Portrait",
                     "landscape": "Landscape"
                 }
+            },
+            "battery_level": {
+                "name": "Battery"
+            },
+            "battery_charging": {
+                "name": "Battery charging",
+                "state": {
+                    "charging": "Charging",
+                    "not_charging": "Not charging"
+                }
             }
         },
         "switch": {
