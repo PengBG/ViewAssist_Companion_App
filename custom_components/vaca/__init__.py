@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 
 from homeassistant.components.wyoming import (
@@ -11,11 +10,10 @@ from homeassistant.components.wyoming import (
     WyomingService,
     async_register_websocket_api,
 )
-from homeassistant.components.wyoming.error import WyomingError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
@@ -45,6 +43,10 @@ __all__ = [
     "async_setup_entry",
     "async_unload_entry",
 ]
+
+
+class WyomingError(HomeAssistantError):
+    """Base class for Wyoming errors."""
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
