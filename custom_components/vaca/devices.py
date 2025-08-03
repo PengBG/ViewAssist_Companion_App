@@ -7,8 +7,9 @@ from dataclasses import dataclass
 import json
 from typing import Any
 
+from wyoming.info import Info
+
 from homeassistant.components.wyoming import SatelliteDevice
-from homeassistant.components.wyoming.data import Info
 from homeassistant.core import callback
 
 
