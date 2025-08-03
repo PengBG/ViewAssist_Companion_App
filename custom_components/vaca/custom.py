@@ -36,16 +36,19 @@ class CustomEvent(Eventable):
 
     def event(self) -> Event:
         """Create an event for the custom event."""
+        data = {"event_type": self.event_type}
+        if self.event_data is not None:
+            data[self.event_type] = self.event_data
         return Event(
             type=_CUSTOM_EVENT_TYPE,
-            data={"event_type": self.event_type, "data": self.event_data},
+            data=data,
         )
 
     @staticmethod
     def from_event(event: Event) -> "CustomEvent":
         """Create a CustomEvent instance from an event."""
         return CustomEvent(
-            event_type=event.data.get("event"), event_data=event.data.get("data")
+            event_type=event.data.get("event_type"), event_data=event.data.get("data")
         )
 
 

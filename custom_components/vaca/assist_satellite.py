@@ -35,6 +35,7 @@ from .client import VAAsyncTcpClient
 from .const import DOMAIN, SAMPLE_CHANNELS, SAMPLE_WIDTH
 from .custom import (
     CAPABILITIES_EVENT_TYPE,
+    SETTINGS_EVENT_TYPE,
     CustomAction,
     CustomEvent,
     CustomSettings,
@@ -126,9 +127,7 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
                 self.hass.config.internal_url if self.hass.config.internal_url else ""
             )
             # Send config event
-            await self._client.write_event(
-                CustomSettings(self.device.custom_settings).event()
-            )
+            self._custom_settings_changed()
 
     async def on_after_send_event_callback(self, event: Event) -> None:
         """Allow injection of events after event sent."""
@@ -354,7 +353,9 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             self.config_entry.async_create_background_task(
                 self.hass,
                 self._client.write_event(
-                    CustomSettings(self.device.custom_settings).event()
+                    CustomEvent(
+                        SETTINGS_EVENT_TYPE, self.device.custom_settings
+                    ).event()
                 ),
                 "custom settings event",
             )
