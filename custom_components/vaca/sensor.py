@@ -257,7 +257,6 @@ class WyomingSatelliteAppVersionSensor(_WyomingSatelliteDeviceSensorBase):
         translation_key="app_version",
         icon="mdi:application",
         entity_category=EntityCategory.DIAGNOSTIC,
-        name="App version",
     )
 
     def _get_native_value(self, value: Any) -> Any:
@@ -270,6 +269,7 @@ class WyomingSatelliteAppVersionSensor(_WyomingSatelliteDeviceSensorBase):
         return {
             "device_signature": self.get_capability("device_signature"),
             "android_version": self.get_capability("release"),
+            "webview_version": self.get_capability("webview_version"),
             "has_battery": self.get_capability("has_battery"),
             "has_front_camera": self.get_capability("has_front_camera"),
             "has_light_sensor": self._device.has_light_sensor(),
