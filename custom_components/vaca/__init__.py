@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Any
 
 from homeassistant.components.wyoming import (
     DomainDataItem,
@@ -118,7 +119,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def get_device_capabilities(item: DomainDataItem):
     """Get device capabilities."""
-    capabilities: CustomEvent | None = None
+    capabilities: dict[str, Any] | None = None
 
     for _ in range(4):
         try:
@@ -130,7 +131,6 @@ async def get_device_capabilities(item: DomainDataItem):
                 await client.write_event(CustomEvent("capabilities").event())
                 while True:
                     event = await client.read_event()
-                    _LOGGER.info("Received event: %s", event)
                     if event is None:
                         raise WyomingError(  # noqa: TRY301
                             "Connection closed unexpectedly",
