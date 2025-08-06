@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from config.custom_components.vaca.custom import CustomActions
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -44,4 +45,4 @@ class WyomingSatelliteWakeButton(VASatelliteEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        self._device.send_custom_action("wake")
+        self._device.send_custom_action(CustomActions.WAKE)

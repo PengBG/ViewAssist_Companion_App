@@ -14,17 +14,19 @@ _CUSTOM_EVENT_TYPE = "custom-event"
 ACTION_EVENT_TYPE = "action"
 CAPABILITIES_EVENT_TYPE = "capabilities"
 SETTINGS_EVENT_TYPE = "settings"
+STATUS_EVENT_TYPE = "status"
 
 
 class CustomActions(StrEnum):
     """Actions for media control."""
 
-    TOAST_MESSAGE = "toast-message"
     MEDIA_PLAY_MEDIA = "play-media"
     MEDIA_PLAY = "play"
     MEDIA_PAUSE = "pause"
     MEDIA_STOP = "stop"
     MEDIA_SET_VOLUME = "set-volume"
+    TOAST_MESSAGE = "toast-message"
+    WAKE = "wake"
 
 
 @dataclass
