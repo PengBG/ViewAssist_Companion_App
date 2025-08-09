@@ -18,7 +18,7 @@ from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
-from .client import VAAsyncTcpClient
+from .client import AsyncTcpClient
 from .const import ATTR_SPEAKER, DOMAIN
 from .custom import CustomEvent
 from .devices import VASatelliteDevice
@@ -124,7 +124,7 @@ async def get_device_capabilities(item: DomainDataItem):
     for _ in range(4):
         try:
             async with (
-                VAAsyncTcpClient(item.service.host, item.service.port) as client,
+                AsyncTcpClient(item.service.host, item.service.port) as client,
                 asyncio.timeout(1),
             ):
                 # Describe -> Info
@@ -144,7 +144,10 @@ async def get_device_capabilities(item: DomainDataItem):
 
                 if capabilities is not None:
                     break  # for
-        except (TimeoutError, OSError, WyomingError):
+        except (TimeoutError, OSError, WyomingError) as ex:
+            _LOGGER.warning(
+                "Error getting device capabilities: %s, %s", ex, capabilities
+            )
             # Sleep and try again
             await asyncio.sleep(2)
 
