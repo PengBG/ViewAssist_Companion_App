@@ -283,5 +283,5 @@ class WyomingSatelliteAppVersionSensor(_WyomingSatelliteDeviceSensorBase):
     def get_sensor_names(self) -> list[str]:
         """Get the names of all sensors."""
         if sensors := self._device.capabilities.get("sensors"):
-            return [json.loads(sensor).get("name") for sensor in sensors]
+            return [sensor.get("name") for sensor in sensors]
         return None

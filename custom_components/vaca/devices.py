@@ -78,7 +78,6 @@ class VASatelliteDevice(SatelliteDevice):
         """Check if the device has a light sensor."""
         if sensors := self.capabilities.get("sensors"):
             for sensor in sensors:
-                sensor = json.loads(sensor)
                 if sensor.get("type") == 5:  # Light sensor type
                     return True
         return False
