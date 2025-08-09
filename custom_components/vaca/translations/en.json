@@ -31,6 +31,9 @@
             }
         },
         "button": {
+            "refresh": {
+                "name": "Refresh"
+            },
             "wake": {
                 "name": "Wake"
             }

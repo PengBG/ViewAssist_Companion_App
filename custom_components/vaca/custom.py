@@ -25,6 +25,7 @@ class CustomActions(StrEnum):
     MEDIA_PAUSE = "pause"
     MEDIA_STOP = "stop"
     MEDIA_SET_VOLUME = "set-volume"
+    REFRESH = "refresh"
     TOAST_MESSAGE = "toast-message"
     WAKE = "wake"
 

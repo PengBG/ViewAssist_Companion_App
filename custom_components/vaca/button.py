@@ -31,6 +31,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             WyomingSatelliteWakeButton(item.device),
+            WyomingSatelliteRefreshButton(item.device),
         ]
     )
 
@@ -46,3 +47,16 @@ class WyomingSatelliteWakeButton(VASatelliteEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Press the button."""
         self._device.send_custom_action(CustomActions.WAKE)
+
+
+class WyomingSatelliteRefreshButton(VASatelliteEntity, ButtonEntity):
+    """Entity to represent if satellite is muted."""
+
+    entity_description = ButtonEntityDescription(
+        key="refresh",
+        translation_key="refresh",
+    )
+
+    async def async_press(self) -> None:
+        """Press the button."""
+        self._device.send_custom_action(CustomActions.REFRESH)
