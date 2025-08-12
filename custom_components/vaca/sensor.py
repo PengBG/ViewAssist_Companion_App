@@ -144,9 +144,13 @@ class WyomingSatelliteIntentSensor(VASatelliteEntity, RestoreSensor):
     def status_update(self, data: dict[str, Any]) -> None:
         """Update entity."""
         if data and data.get("intent_output"):
-            self._attr_native_value = self.get_key(
-                "intent_output.response.speech.plain.speech", data
-            )[254:]
+            value = self.get_key("intent_output.response.speech.plain.speech", data)
+            if value:
+                if len(value) > 254:
+                    # Limit the length of the value to avoid issues with Home Assistant
+                    value = value[:252] + ".."
+                self._attr_native_value = value
+
             self._attr_extra_state_attributes = data
             self.async_write_ha_state()
 
