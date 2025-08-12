@@ -9,97 +9,55 @@ from wyoming.event import Event, Eventable
 
 _LOGGER = logging.getLogger(__name__)
 
-_CUSTOM_SETTINGS_TYPE = "custom-settings"
-_CUSTOM_ACTION_TYPE = "custom-action"
+_CUSTOM_EVENT_TYPE = "custom-event"
 
-
-@dataclass
-class CustomSettings(Eventable):
-    """Custom settings event."""
-
-    settings: dict[str, Any]
-    """Text to copy to response."""
-
-    @staticmethod
-    def is_type(event_type: str) -> bool:
-        """Check if the event type is a custom settings event."""
-        return event_type == _CUSTOM_SETTINGS_TYPE
-
-    def event(self) -> Event:
-        """Create an event for custom settings."""
-        return Event(
-            type=_CUSTOM_SETTINGS_TYPE,
-            data={"settings": self.settings},
-        )
-
-    @staticmethod
-    def from_event(event: Event) -> "CustomSettings":
-        """Create a CustomSettings instance from an event."""
-        return CustomSettings(settings=event.data.get("settings"))
+ACTION_EVENT_TYPE = "action"
+CAPABILITIES_EVENT_TYPE = "capabilities"
+SETTINGS_EVENT_TYPE = "settings"
+STATUS_EVENT_TYPE = "status"
 
 
 class CustomActions(StrEnum):
     """Actions for media control."""
 
-    GET_DEVICE_INFO = "get-device-info"
-    TOAST_MESSAGE = "toast-message"
     MEDIA_PLAY_MEDIA = "play-media"
     MEDIA_PLAY = "play"
     MEDIA_PAUSE = "pause"
     MEDIA_STOP = "stop"
     MEDIA_SET_VOLUME = "set-volume"
+    REFRESH = "refresh"
+    TOAST_MESSAGE = "toast-message"
+    WAKE = "wake"
 
 
 @dataclass
-class CustomAction(Eventable):
-    """Custom action event."""
+class CustomEvent(Eventable):
+    """Custom event class."""
 
-    action: CustomActions
-    """Action to perform."""
+    event_type: str
+    """Type of the event."""
 
-    payload: dict[str, Any] | None = None
-    """Optional payload for the action."""
-
-    @staticmethod
-    def is_type(event_type: str) -> bool:
-        """Check if the event type is a custom action event."""
-        return event_type == _CUSTOM_ACTION_TYPE
-
-    def event(self) -> Event:
-        """Create an event for custom action."""
-        return Event(
-            type=_CUSTOM_ACTION_TYPE,
-            data={"action": self.action, "payload": self.payload},
-        )
-
-    @staticmethod
-    def from_event(event: Event) -> "CustomAction":
-        """Create a CustomAction instance from an event."""
-        return CustomAction(
-            action=event.data.get("action"), payload=event.data.get("payload")
-        )
-
-
-@dataclass
-class CustomStatus(Eventable):
-    """Custom sensor value event."""
-
-    data: Any
-    """Value of the sensor."""
+    event_data: dict[str, Any] | None = None
+    """Data associated with the event."""
 
     @staticmethod
     def is_type(event_type: str) -> bool:
-        """Check if the event type is a custom sensor value event."""
-        return event_type == "custom-status"
+        """Check if the event type matches."""
+        return event_type == _CUSTOM_EVENT_TYPE
 
     def event(self) -> Event:
-        """Create an event for custom sensor value."""
+        """Create an event for the custom event."""
+        data = {"event_type": self.event_type}
+        if self.event_data is not None:
+            data.update(self.event_data)
         return Event(
-            type="custom-status",
-            data=self.data,
+            type=_CUSTOM_EVENT_TYPE,
+            data=data,
         )
 
     @staticmethod
-    def from_event(event: Event) -> "CustomStatus":
-        """Create a CustomSensorValue instance from an event."""
-        return CustomStatus(data=event.data)
+    def from_event(event: Event) -> "CustomEvent":
+        """Create a CustomEvent instance from an event."""
+        return CustomEvent(
+            event_type=event.data.get("event_type"), event_data=event.data.get("data")
+        )

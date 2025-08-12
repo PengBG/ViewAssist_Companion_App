@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+import json
 from typing import Any
 
+from wyoming.info import Info
+
 from homeassistant.components.wyoming import SatelliteDevice
-from homeassistant.components.wyoming.data import Info
 from homeassistant.core import callback
 
 
@@ -17,6 +19,7 @@ class VASatelliteDevice(SatelliteDevice):
 
     info: Info | None = None
     custom_settings: dict[str, Any] | None = None
+    capabilities: dict[str, Any] | None = None
 
     _custom_settings_listener: Callable[[], None] | None = None
     _custom_action_listener: Callable[[], None] | None = None
@@ -70,3 +73,11 @@ class VASatelliteDevice(SatelliteDevice):
     def set_tts_listener(self, tts_listener: Callable[[str], None]) -> None:
         """Listen for stt updates."""
         self.tts_listener = tts_listener
+
+    def has_light_sensor(self) -> bool:
+        """Check if the device has a light sensor."""
+        if sensors := self.capabilities.get("sensors"):
+            for sensor in sensors:
+                if sensor.get("type") == 5:  # Light sensor type
+                    return True
+        return False

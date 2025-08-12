@@ -11,6 +11,7 @@ import wave
 
 from wyoming.audio import AudioChunk, AudioStart, AudioStop
 from wyoming.event import Event
+from wyoming.info import Describe
 from wyoming.pipeline import PipelineStage, RunPipeline
 from wyoming.satellite import RunSatellite
 
@@ -31,8 +32,14 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .client import VAAsyncTcpClient
-from .const import DOMAIN, INTENT_EVENT, SAMPLE_CHANNELS, SAMPLE_WIDTH
-from .custom import CustomAction, CustomSettings, CustomStatus
+from .const import DOMAIN, SAMPLE_CHANNELS, SAMPLE_WIDTH
+from .custom import (
+    ACTION_EVENT_TYPE,
+    CAPABILITIES_EVENT_TYPE,
+    SETTINGS_EVENT_TYPE,
+    STATUS_EVENT_TYPE,
+    CustomEvent,
+)
 from .devices import VASatelliteDevice
 from .entity import VASatelliteEntity
 
@@ -111,6 +118,7 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
 
     async def on_before_send_event_callback(self, event: Event) -> None:
         """Allow injection of events before event sent."""
+
         if RunSatellite().is_type(event.type):
             # Update url and port
             self.device.custom_settings["ha_port"] = self.hass.config.api.port
@@ -118,27 +126,38 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
                 self.hass.config.internal_url if self.hass.config.internal_url else ""
             )
             # Send config event
-            await self._client.write_event(
-                CustomSettings(self.device.custom_settings).event()
-            )
+            self._custom_settings_changed()
 
     async def on_after_send_event_callback(self, event: Event) -> None:
         """Allow injection of events after event sent."""
+        if Describe().is_type(event.type):
+            await self._client.write_event(CustomEvent("capabilities").event())
 
-    async def on_receive_event_callback(self, event: Event) -> None:
+    async def on_receive_event_callback(
+        self, event: Event
+    ) -> tuple[bool, Event | None]:
         """Handle received custom events."""
-        if event and CustomStatus.is_type(event.type):
-            # Custom status event
-            status = CustomStatus.from_event(event)
-            _LOGGER.debug(
-                "Received status event: %s",
-                status.data,
-            )
+        if event and CustomEvent.is_type(event.type):
+            # Custom event
+            evt = CustomEvent.from_event(event)
+
+            if evt.event_type == CAPABILITIES_EVENT_TYPE:
+                self.device.capabilities = evt.event_data.get("capabilities", {})
+
+            elif evt.event_type == STATUS_EVENT_TYPE:
+                _LOGGER.debug(
+                    "Received status event: %s",
+                    evt.event_data,
+                )
+
             async_dispatcher_send(
                 self.hass,
-                f"{DOMAIN}_{self.device.device_id}_status_update",
-                status.data,
+                f"{DOMAIN}_{self.device.device_id}_{evt.event_type}_update",
+                evt.event_data,
             )
+            return False, None
+
+        return True, event
 
     async def _connect(self) -> None:
         """Connect to satellite over TCP.  Uses custom TCP client to allow callbacks on send."""
@@ -330,7 +349,10 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             self.config_entry.async_create_background_task(
                 self.hass,
                 self._client.write_event(
-                    CustomSettings(self.device.custom_settings).event()
+                    CustomEvent(
+                        SETTINGS_EVENT_TYPE,
+                        {SETTINGS_EVENT_TYPE: self.device.custom_settings},
+                    ).event()
                 ),
                 "custom settings event",
             )
@@ -343,7 +365,10 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             self.config_entry.async_create_background_task(
                 self.hass,
                 self._client.write_event(
-                    CustomAction(action=command, payload=payload).event()
+                    CustomEvent(
+                        ACTION_EVENT_TYPE,
+                        {"action": command, "payload": payload},
+                    ).event()
                 ),
                 "media player command",
             )

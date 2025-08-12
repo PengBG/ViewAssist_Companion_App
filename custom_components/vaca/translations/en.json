@@ -26,8 +26,16 @@
     },
     "entity": {
         "binary_sensor": {
-            "assist_in_progress": {
-                "name": "Assist in progress"
+            "battery_charging": {
+                "name": "Battery charging"
+            }
+        },
+        "button": {
+            "refresh": {
+                "name": "Refresh"
+            },
+            "wake": {
+                "name": "Wake"
             }
         },
         "media_player": {
@@ -117,6 +125,12 @@
                     "portrait": "Portrait",
                     "landscape": "Landscape"
                 }
+            },
+            "battery_level": {
+                "name": "Battery"
+            },
+            "app_version": {
+                "name": "App version"
             }
         },
         "switch": {
@@ -137,6 +151,9 @@
             },
             "dark_mode": {
                 "name": "Dark mode"
+            },
+            "diagnostics_enabled": {
+                "name": "On screen diagnostics"
             }
         }
     }

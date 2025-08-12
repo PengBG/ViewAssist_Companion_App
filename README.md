@@ -53,21 +53,37 @@ As is common with new custom integrations, it can take a little while to be full
 
 The app is not currently available in the Play store and will need to be downloaded from the apk folder in this repository and installed on your device.
 
+# Diagnostics Overlay (v0.3.4 and above)
+
+We have added an experimental feature in v0.3.4 to provide an overlay on the screen, displaying microphone audio level and wake word prediction value to aide with voice issues - be it not hearing wake word, too many false positives, poor interpretation of commands or just pure geeky interest!
+
+This feature can be enabled/disabled using the `On screen diagnostics` switch entity in the VACA integration device.
+
+Please read the below to understand what this is showing you.
+
+### Microphone audio level
+
+This is the level of audio being processed by the wake word engine (while waiting for wake word) or being sent to the Speach To Text (STT) engine when the wake word has been detected.
+
+You will notice on some devices that the audio level seems very low (in the 0.00xx level) and on others much higher (in the 0.xx level) when listening for the wake word. This is ok (is a feature of the device hardware/OEM Android config) and the wake word detection engine will work just as well. **NOTE**: The gain setting makes no difference to this level.
+
+Once the wake word is detected, VACA switches into STT mode to stream audio over the network to HA and you will see a significant jump in the audio level (in the 1.x to 5.x range). This is where the auto gain function has kicked in to boost the audio level (to try and be consistent no matter the device) and improve the command interpretation by your chosen STT engine. The mic gain setting is in effect here. You should expect this level to be in the high 2.x to 3.x range with gain at 0. Dropping to 1.x at -10 and increasing to 4-5.x at +10.
+
+So, why not boost the audio level for wake word detection? Well, very good question. And the answer is, we tried that and it actually made it worse in real world testing, so we removed it.
+
+### Wake word prediction
+
+This is the wake word engine's level of confidence that the audio heard was the wake word when in wake word listening mode. In the settings, there is a wake word threshold setting, which directly relates to this prediciton number. Ie, once this prediction number is greater than the threshold level, it will class that as a wake word detection.
+
+A setting of 6 on the threshold setting should be a good place to start to find the right balance for good detection without many false detections in noisier environments.
+
+Some wake words are better at detecting/less sensitive to accents than others and you may need to adjust this threshold setting if you change the wake word you wish to use, and this diagnostic overlay should help you get that setting right for you.
+
 # FAQs
-
-### My device detects the wake word ok but then doesn't hear what I am saying
-
-This is caused by the mic gain setting either being too low or too high. Too low and it will struggle to hear you, too high and it will clip the audio and make your voice unintelligable.
-
-- On a Lenovo TSV, start at 1 and don't go any more than 5
-- On a Lenovo LSD 8 & 10, try a setting of around 60 and adjust between 40 and 80 to get the best result
-- On other devices, always start at 1 and adjust in increments of 1 if it hears you but needs to be more sensitive or in increments of 10 if it doesn't hear you at all when set to 1.
-
----
 
 ### My device doesn't pick up the wake word or picks up too many false positives
 
-Try adjusting the wake word threshold. It is default set to 80 but play around with it until it works the best. The lower the setting the more it will detect but becomes more suseptable to fale positives. The higher it is, the more likley background noise will stop it detecting. Default is 80 as that seems to be the best compromise in most tested situations.
+Try adjusting the wake word threshold. It is default set to 6 but play around with it until it works the best. The lower the setting the more it will detect but becomes more suseptable to fale positives. The higher it is, the more likley background noise will stop it detecting. Also see diagnostics overlay section.
 
 ---
 
