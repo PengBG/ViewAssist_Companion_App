@@ -146,7 +146,7 @@ class WyomingSatelliteIntentSensor(VASatelliteEntity, RestoreSensor):
         if data and data.get("intent_output"):
             self._attr_native_value = self.get_key(
                 "intent_output.response.speech.plain.speech", data
-            )
+            )[254:]
             self._attr_extra_state_attributes = data
             self.async_write_ha_state()
 
@@ -224,6 +224,7 @@ class WyomingSatelliteLightSensor(_WyomingSatelliteDeviceSensorBase):
         translation_key="light_level",
         device_class=SensorDeviceClass.ILLUMINANCE,
         native_unit_of_measurement=LIGHT_LUX,
+        suggested_display_precision=0,
     )
 
 
