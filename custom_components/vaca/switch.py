@@ -28,18 +28,21 @@ async def async_setup_entry(
 
     # Setup is only forwarded for satellites
     assert item.device is not None
+    entities = [
+        WyomingSatelliteMuteSwitch(item.device),
+        WyomingSatelliteSwipeToRefreshSwitch(item.device),
+        WyomingSatelliteScreenAutoBrightnessSwitch(item.device),
+        WyomingSatelliteScreenAlwaysOnSwitch(item.device),
+        WyomingSatelliteDarkModeSwitch(item.device),
+        WyomingSatelliteDiagnosticsSwitch(item.device),
+    ]
 
-    async_add_entities(
-        [
-            WyomingSatelliteMuteSwitch(item.device),
-            WyomingSatelliteSwipeToRefreshSwitch(item.device),
-            WyomingSatelliteScreenAutoBrightnessSwitch(item.device),
-            WyomingSatelliteScreenAlwaysOnSwitch(item.device),
-            WyomingSatelliteDarkModeSwitch(item.device),
-            WyomingSatelliteDNDSwitch(item.device),
-            WyomingSatelliteDiagnosticsSwitch(item.device),
-        ]
-    )
+    if capabilities := item.device.capabilities:
+        if capabilities.get("has_dnd"):
+            entities.append(WyomingSatelliteDNDSwitch(item.device))
+
+    if entities:
+        async_add_entities(entities)
 
 
 class WyomingSatelliteMuteSwitch(
