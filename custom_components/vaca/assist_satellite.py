@@ -32,13 +32,14 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .client import VAAsyncTcpClient
-from .const import DOMAIN, SAMPLE_CHANNELS, SAMPLE_WIDTH
+from .const import DOMAIN, MIN_APK_VERSION, SAMPLE_CHANNELS, SAMPLE_WIDTH
 from .custom import (
     ACTION_EVENT_TYPE,
     CAPABILITIES_EVENT_TYPE,
     SETTINGS_EVENT_TYPE,
     STATUS_EVENT_TYPE,
     CustomEvent,
+    getIntegrationVersion,
 )
 from .devices import VASatelliteDevice
 from .entity import VASatelliteEntity
@@ -120,6 +121,11 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
         """Allow injection of events before event sent."""
 
         if RunSatellite().is_type(event.type):
+            # integration version
+            self.device.custom_settings[
+                "integration_version"
+            ] = await getIntegrationVersion(self.hass)
+            self.device.custom_settings["min_required_apk_version"] = MIN_APK_VERSION
             # Update url and port
             self.device.custom_settings["ha_port"] = self.hass.config.api.port
             self.device.custom_settings["ha_url"] = (
