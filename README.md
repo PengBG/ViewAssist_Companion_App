@@ -39,19 +39,23 @@ The integration and Android application together have the following features:
 
 ## Installation
 
-There are 2 components to this solution, a HA custom integration and an Android application.
+There are 2 components to this solution, a HA custom integration and an Android application. Install the custom integration first and then install the app on your devices.
 
-**NOTE**: You will need the latest dev version of the View Assist integration which has support for VACA to be able to select the microphone entity when setting up the device in View Assist
+Devices should be auto discovered with mDns (zeroconf) and appear in the list of discovered devices in Devices & Services. If they do not, you can add them manually using the IP address displayed on your device on the 'waiting connection' screen and use port 10800.
+
+If you have previously paired your device with a HA instance and deleted that setup or want to change the HA instance the device is connected to (or the IP of HA has changed), you will need to unpair your device. This can be done by long pressing on the logo on the waiting connection screen. You will see the paired device IP address revert to 'not paired'.
+
+**NOTE**: You will need at least the 2025.7.0 version of the View Assist integration which has support for VACA to be able to select the microphone entity when setting up the device in View Assist
 
 ### Custom Integration
 
-As is common with new custom integrations, it can take a little while to be fully available via HACs. However, you can add this as a custom respository by the following link to then provide the normal HACs install and update experience.
+As is common with new custom integrations, it can take a little while to be fully available via HACs. However, you can add this as a custom respository by using the following link to then provide the normal HACs install and update experience.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=msp1974&repository=ViewAssist_Companion_App&category=Integration)
 
 ### Android Application
 
-The app is not currently available in the Play store and will need to be downloaded from the apk folder in this repository and installed on your device.
+The app is not currently available in the Play store and will need to be downloaded from the release assets in this repository and installed on your device.  [Latest release](https://github.com/msp1974/ViewAssist_Companion_App/releases/latest)
 
 # Diagnostics Overlay (v0.3.4 and above)
 
@@ -65,7 +69,7 @@ Please read the below to understand what this is showing you.
 
 This is the level of audio being processed by the wake word engine (while waiting for wake word) or being sent to the Speach To Text (STT) engine when the wake word has been detected.
 
-You will notice on some devices that the audio level seems very low (in the 0.00xx level) and on others much higher (in the 0.xx level) when listening for the wake word. This is ok (is a feature of the device hardware/OEM Android config) and the wake word detection engine will work just as well. **NOTE**: The gain setting makes no difference to this level.
+You will notice on some devices that the audio level seems very low (in the 0.00x level) and on others much higher (in the 0.x level) when listening for the wake word. This is ok (it is a feature of the device hardware/OEM Android config) and the wake word detection engine will work just as well. **NOTE**: The gain setting makes no difference to this level.
 
 Once the wake word is detected, VACA switches into STT mode to stream audio over the network to HA and you will see a significant jump in the audio level (in the 1.x to 5.x range). This is where the auto gain function has kicked in to boost the audio level (to try and be consistent no matter the device) and improve the command interpretation by your chosen STT engine. The mic gain setting is in effect here. You should expect this level to be in the high 2.x to 3.x range with gain at 0. Dropping to 1.x at -10 and increasing to 4-5.x at +10.
 
