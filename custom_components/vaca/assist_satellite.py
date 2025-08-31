@@ -437,8 +437,32 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
         finally:
             send_duration = time.monotonic() - start_time
             timeout_seconds = max(0, total_seconds - send_duration + _TTS_TIMEOUT_EXTRA)
+
+            if self._played_event_received is None:
+                self._played_event_received = asyncio.Event()
+            self._played_event_received.clear()
+
             self.config_entry.async_create_background_task(
                 self.hass,
                 self._tts_timeout(timeout_seconds, self._run_loop_id),
                 name="wyoming TTS timeout",
             )
+
+    async def _tts_timeout(
+        self, timeout_seconds: float, run_loop_id: str | None
+    ) -> None:
+        """Force state change to IDLE in case TTS played event isn't received."""
+        await asyncio.sleep(timeout_seconds + _TTS_TIMEOUT_EXTRA)
+
+        if (
+            self._played_event_received is not None
+            and self._played_event_received.is_set()
+        ):
+            # Played event already received
+            return
+
+        if run_loop_id != self._run_loop_id:
+            # On a different pipeline run now
+            return
+
+        self.tts_response_finished()
