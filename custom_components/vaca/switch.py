@@ -35,6 +35,7 @@ async def async_setup_entry(
         WyomingSatelliteScreenAlwaysOnSwitch(item.device),
         WyomingSatelliteDarkModeSwitch(item.device),
         WyomingSatelliteDiagnosticsSwitch(item.device),
+        WyomingSatelliteContinueConversationSwitch(item.device),
     ]
 
     if capabilities := item.device.capabilities:
