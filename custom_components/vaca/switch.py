@@ -161,3 +161,15 @@ class WyomingSatelliteDiagnosticsSwitch(BaseSwitch):
         entity_category=EntityCategory.DIAGNOSTIC,
     )
     default_on = True
+
+
+class WyomingSatelliteContinueConversationSwitch(BaseSwitch):
+    """Entity to control continue conversation on/off."""
+
+    entity_description = SwitchEntityDescription(
+        key="continue_conversation",
+        translation_key="continue_conversation",
+        icon="mdi:message-bulleted",
+        entity_category=EntityCategory.CONFIG,
+    )
+    default_on = True
