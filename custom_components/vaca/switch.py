@@ -114,7 +114,7 @@ class WyomingSatelliteScreenAutoBrightnessSwitch(BaseSwitch):
         icon="mdi:monitor-screenshot",
         entity_category=EntityCategory.CONFIG,
     )
-    default_on = False
+    default_on = True
 
 
 class WyomingSatelliteScreenAlwaysOnSwitch(BaseSwitch):
@@ -138,7 +138,7 @@ class WyomingSatelliteDarkModeSwitch(BaseSwitch):
         icon="mdi:compare",
         entity_category=EntityCategory.CONFIG,
     )
-    default_on = True
+    default_on = False
 
 
 class WyomingSatelliteDNDSwitch(BaseSwitch):
@@ -149,7 +149,7 @@ class WyomingSatelliteDNDSwitch(BaseSwitch):
         translation_key="do_not_disturb",
         icon="mdi:do-not-disturb",
     )
-    default_on = True
+    default_on = False
 
 
 class WyomingSatelliteDiagnosticsSwitch(BaseSwitch):
@@ -161,7 +161,7 @@ class WyomingSatelliteDiagnosticsSwitch(BaseSwitch):
         icon="mdi:microphone-question",
         entity_category=EntityCategory.DIAGNOSTIC,
     )
-    default_on = True
+    default_on = False
 
 
 class WyomingSatelliteContinueConversationSwitch(BaseSwitch):
