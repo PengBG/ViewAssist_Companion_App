@@ -9,7 +9,7 @@ Combining an Android application and a Home Assistant integration (to control yo
 - A media player to play your favourite music / radio station from HA
 - A comprehensive set of controls & sensor entities to use in your automations and dashboards
 
-## Information
+## Installation & Information
 
 Documentation, including installation instructions and configuration information about this integration can be found on the wiki pages [here](https://github.com/msp1974/ViewAssist_Companion_App/wiki)
 
