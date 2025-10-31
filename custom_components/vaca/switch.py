@@ -109,7 +109,6 @@ class BaseFeedbackSwitch(BaseSwitch):
 
     async def status_update(self, data: dict[str, Any]) -> None:
         """Handle status update."""
-        _LOGGER.error("Received status update for %s: %s", self.entity_id, data)
         if settings := data.get("settings"):
             if self.entity_description.key in settings:
                 setting_state = settings[self.entity_description.key]
