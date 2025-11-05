@@ -112,6 +112,9 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
         # Init custom settings
         self.device.custom_settings = {}
 
+        # stream tts var to allow interupt and cancel remaining response
+        self.stream_tts = False
+
     async def async_will_remove_from_hass(self) -> None:
         """Run when entity will be removed from hass."""
         try:
@@ -146,6 +149,10 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
     @callback
     def on_receive_event_callback(self, event: Event) -> tuple[bool, Event | None]:
         """Handle received custom events."""
+        if event and AudioStop.is_type(event.type):
+            self.stream_tts = False
+            return not self.stream_tts, event
+
         if event and CustomEvent.is_type(event.type):
             # Custom event
             evt = CustomEvent.from_event(event)
@@ -155,7 +162,8 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
 
             elif evt.event_type == STATUS_EVENT_TYPE:
                 _LOGGER.debug(
-                    "Received status event: %s",
+                    "Received %s event: %s",
+                    evt.event_type,
                     evt.event_data,
                 )
 
@@ -411,6 +419,9 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
                 sample_channels = wav_file.getnchannels()
                 _LOGGER.debug("Streaming %s TTS sample(s)", wav_file.getnframes())
 
+                # Start audio stream - set flag to allow streaming
+                self.stream_tts = True
+
                 timestamp = 0
                 await self._client.write_event(
                     AudioStart(
@@ -423,6 +434,10 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
 
                 # Stream audio chunks
                 while audio_bytes := wav_file.readframes(_SAMPLES_PER_CHUNK):
+                    # If flag set to false, stop streaming
+                    if not self.stream_tts:
+                        _LOGGER.debug("TTS streaming interrupted")
+                        break
                     chunk = AudioChunk(
                         rate=sample_rate,
                         width=sample_width,
