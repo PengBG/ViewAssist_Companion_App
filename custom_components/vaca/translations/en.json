@@ -28,6 +28,9 @@
         "binary_sensor": {
             "battery_charging": {
                 "name": "Battery charging"
+            },
+            "screen_on": {
+                "name": "Screen"
             }
         },
         "button": {
