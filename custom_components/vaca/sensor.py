@@ -42,6 +42,7 @@ async def async_setup_entry(
         WyomingSatelliteTTSSensor(item.device),
         WyomingSatelliteIntentSensor(item.device),
         WyomingSatelliteOrientationSensor(item.device),
+        WyomingSatelliteBrowserPathSensor(item.device),
     ]
 
     if capabilities := item.device.capabilities:
@@ -249,6 +250,15 @@ class WyomingSatelliteBatteryLevelSensor(_WyomingSatelliteDeviceSensorBase):
         translation_key="battery_level",
         device_class=SensorDeviceClass.BATTERY,
         native_unit_of_measurement=PERCENTAGE,
+    )
+
+
+class WyomingSatelliteBrowserPathSensor(_WyomingSatelliteDeviceSensorBase):
+    """Entity to represent battery level sensor for satellite."""
+
+    _attr_native_value = UNKNOWN
+    entity_description = SensorEntityDescription(
+        key="current_path", translation_key="current_path", icon="mdi:web"
     )
 
 

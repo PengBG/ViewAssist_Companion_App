@@ -142,6 +142,9 @@
             },
             "app_version": {
                 "name": "App version"
+            },
+            "current_path": {
+                "name": "Current path"
             }
         },
         "switch": {
