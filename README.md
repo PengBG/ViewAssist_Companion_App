@@ -34,6 +34,11 @@ For issues/bugs, please log an issue [here](https://github.com/msp1974/ViewAssis
 If you need help or just want to chat with like minded people, feel free to drop into the View Assist discord server [here](https://discord.com/channels/1241796965344481440)
 
 ## Screenshots (using View Assist views)
+<img width="235" height="495" alt="image" src="https://github.com/user-attachments/assets/164b4f1a-ec70-4a3e-8e08-a79770fdded5" />
+<img width="235" height="490" alt="image" src="https://github.com/user-attachments/assets/9e54578b-390e-4eb2-afad-33e3c5d73091" />
+<img width="235" height="430" alt="image" src="https://github.com/user-attachments/assets/8a628cd7-d4a4-4a37-abf3-ea0130d6be3d" />
+<img width="235" height="467" alt="image" src="https://github.com/user-attachments/assets/44f7db39-95a0-45d4-a092-593684a92c3e" />
+
 <img width="960" height="600" alt="image" src="https://github.com/user-attachments/assets/25539d64-f355-45a1-8ae5-2242d3027ef5" />
 
 <img width="960" height="480" alt="image" src="https://github.com/user-attachments/assets/164e00e7-55e9-48e3-8e9f-dc7bd35104b5" />
