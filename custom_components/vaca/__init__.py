@@ -136,10 +136,10 @@ async def get_device_capabilities(item: DomainDataItem):
                             "Connection closed unexpectedly",
                         )
 
-                    if CustomEvent.is_type(event.type):
-                        capabilities = CustomEvent.from_event(event).event_data.get(
-                            "capabilities"
-                        )
+                    if CustomEvent.is_type(event.type) and (
+                        event_data := CustomEvent.from_event(event).event_data
+                    ):
+                        capabilities = event_data.get("capabilities")
                         break  # while
 
                 if capabilities is not None:

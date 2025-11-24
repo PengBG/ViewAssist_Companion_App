@@ -30,7 +30,7 @@ class VAAsyncTcpClient(AsyncTcpClient):
         if self._after_send_callback:
             await self._after_send_callback(event)
 
-    async def read_event(self) -> Event:
+    async def read_event(self) -> Event | None:
         """Read an event from the server."""
         modified_event = None
         forward_event = False

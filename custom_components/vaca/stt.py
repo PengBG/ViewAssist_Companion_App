@@ -9,12 +9,14 @@ from wyoming.client import AsyncTcpClient
 
 from homeassistant.components import stt
 from homeassistant.components.wyoming import DomainDataItem, WyomingService
+
+# pylint: disable-next=hass-component-root-import
+from homeassistant.components.wyoming.error import WyomingError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN, SAMPLE_CHANNELS, SAMPLE_RATE, SAMPLE_WIDTH
-from .error import WyomingError
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -174,7 +174,7 @@ class WyomingSatelliteIntentSensor(VASatelliteEntity, RestoreSensor):
                 dn_list = dot_notation_path.split(".")
             else:
                 dn_list = [dot_notation_path]
-            return reduce(dict.get, dn_list, data)
+            return reduce(dict.get, dn_list, data)  # type: ignore[return-value]
         except (TypeError, KeyError):
             return None
 
@@ -243,7 +243,9 @@ class _WyomingSatelliteDeviceSensorBase(VASatelliteEntity, RestoreSensor):
                         )
                     self.async_write_ha_state()
         elif self._listener_class == "capabilities_update":
-            if self._device.capabilities.get(self.entity_description.key):
+            if self._device.capabilities and self._device.capabilities.get(
+                self.entity_description.key
+            ):
                 self._attr_native_value = self._get_native_value(
                     self._device.capabilities[self.entity_description.key]
                 )
@@ -334,10 +336,14 @@ class WyomingSatelliteAppVersionSensor(_WyomingSatelliteDeviceSensorBase):
 
     def get_capability(self, capability: str) -> Any:
         """Get a specific capability from the device."""
+        if self._device.capabilities is None:
+            return UNKNOWN
         return self._device.capabilities.get(capability, UNKNOWN)
 
-    def get_sensor_names(self) -> list[str]:
+    def get_sensor_names(self) -> list[str] | None:
         """Get the names of all sensors."""
-        if sensors := self._device.capabilities.get("sensors"):
+        if self._device.capabilities and (
+            sensors := self._device.capabilities.get("sensors")
+        ):
             return [sensor.get("name") for sensor in sensors]
         return None
