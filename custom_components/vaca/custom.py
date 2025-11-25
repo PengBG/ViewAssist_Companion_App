@@ -5,11 +5,13 @@ from enum import StrEnum
 import logging
 from typing import Any
 
+from awesomeversion import AwesomeVersion
 from wyoming.event import Event, Eventable
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.loader import async_get_integration
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,13 +46,16 @@ class PipelineEnded(Eventable):
 
     @staticmethod
     def is_type(event_type: str) -> bool:
+        """Check if the event type matches."""
         return event_type == _PIPELINE_ENDED_EVENT_TYPE
 
     def event(self) -> Event:
+        """Create an event for the pipeline ended."""
         return Event(type=_PIPELINE_ENDED_EVENT_TYPE)
 
     @staticmethod
     def from_event(event: Event) -> "PipelineEnded":
+        """Create a PipelineEnded instance from an event."""
         return PipelineEnded()
 
 
@@ -83,11 +88,12 @@ class CustomEvent(Eventable):
     def from_event(event: Event) -> "CustomEvent":
         """Create a CustomEvent instance from an event."""
         return CustomEvent(
-            event_type=event.data.get("event_type"), event_data=event.data.get("data")
+            event_type=event.data.get("event_type", "unknown"),
+            event_data=event.data.get("data"),
         )
 
 
-async def getIntegrationVersion(hass: HomeAssistant) -> str:
+async def getIntegrationVersion(hass: HomeAssistant) -> str | AwesomeVersion | None:
     """Get the integration version."""
     integration = await async_get_integration(hass, DOMAIN)
     return integration.version if integration else "0.0.0"
@@ -117,7 +123,7 @@ def getVADashboardPath(hass: HomeAssistant, uuid: str) -> str:
                                         if home := master_entry.options.get("home"):
                                             return home
                                 return "view-assist"
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 _LOGGER.error("Error getting dashboard path: %s", e)
                 continue
     return ""

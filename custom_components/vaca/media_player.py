@@ -22,6 +22,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
 from .custom import CustomActions
+from .devices import VASatelliteDevice
 from .entity import VASatelliteEntity
 
 if TYPE_CHECKING:
@@ -37,11 +38,12 @@ async def async_setup_entry(
 ) -> None:
     """Set up media_player entities."""
     item: DomainDataItem = hass.data[DOMAIN][config_entry.entry_id]
+    device: VASatelliteDevice = item.device  # type: ignore[assignment]
 
     # Setup is only forwarded for satellites
     assert item.device is not None
 
-    async_add_entities([WyomingMediaPlayer(item.device)])
+    async_add_entities([WyomingMediaPlayer(device)])
 
 
 class WyomingMediaPlayer(VASatelliteEntity, MediaPlayerEntity):
@@ -103,7 +105,7 @@ class WyomingMediaPlayer(VASatelliteEntity, MediaPlayerEntity):
         _LOGGER.info("Playing media: '%s'", media_id)
         self._device.send_custom_action(
             command=CustomActions.MEDIA_PLAY_MEDIA,
-            payload={"url": media_id, "volume": self._attr_volume_level * 100},
+            payload={"url": media_id, "volume": (self._attr_volume_level or 0) * 100},
         )
         self._attr_state = MediaPlayerState.PLAYING
 
@@ -122,7 +124,7 @@ class WyomingMediaPlayer(VASatelliteEntity, MediaPlayerEntity):
         _LOGGER.info("Playing")
         self._device.send_custom_action(
             command=CustomActions.MEDIA_PLAY,
-            payload={"volume": self._attr_volume_level * 100},
+            payload={"volume": (self._attr_volume_level or 0) * 100},
         )
         self._attr_state = MediaPlayerState.PLAYING
         self.async_write_ha_state()
@@ -158,11 +160,11 @@ class WyomingMediaPlayer(VASatelliteEntity, MediaPlayerEntity):
 
     async def async_volume_up(self):
         """Increase the volume level."""
-        return await self.async_set_volume_level(self._attr_volume_level + 0.1)
+        return await self.async_set_volume_level((self._attr_volume_level or 0) + 0.1)
 
     async def async_volume_down(self):
         """Decrease the volume level."""
-        return await self.async_set_volume_level(self._attr_volume_level - 0.1)
+        return await self.async_set_volume_level((self._attr_volume_level or 0) - 0.1)
 
     # https://developers.home-assistant.io/docs/core/entity/media-player/#browse-media
     async def async_browse_media(

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-from homeassistant.components.assist_pipeline.select import (
+from homeassistant.components.assist_pipeline import (
     AssistPipelineSelect,
+    VadSensitivity,
     VadSensitivitySelect,
 )
-from homeassistant.components.assist_pipeline.vad import VadSensitivity
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
@@ -17,7 +17,7 @@ from homeassistant.helpers import restore_state
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
-from .devices import SatelliteDevice
+from .devices import VASatelliteDevice
 from .entity import VASatelliteEntity
 
 if TYPE_CHECKING:
@@ -40,18 +40,19 @@ async def async_setup_entry(
 ) -> None:
     """Set up select entities."""
     item: DomainDataItem = hass.data[DOMAIN][config_entry.entry_id]
+    device: VASatelliteDevice = item.device  # type: ignore[assignment]
 
     # Setup is only forwarded for satellites
     assert item.device is not None
 
     async_add_entities(
         [
-            WyomingSatellitePipelineSelect(hass, item.device),
-            WyomingSatelliteNoiseSuppressionLevelSelect(item.device),
-            WyomingSatelliteVadSensitivitySelect(hass, item.device),
-            WyomingSatelliteWakeWordSelect(item.device),
-            WyomingSatelliteWakeWordSoundSelect(item.device),
-            WyomingSatelliteScreenTimeoutSelect(item.device),
+            WyomingSatellitePipelineSelect(hass, device),
+            WyomingSatelliteNoiseSuppressionLevelSelect(device),
+            WyomingSatelliteVadSensitivitySelect(hass, device),
+            WyomingSatelliteWakeWordSelect(device),
+            WyomingSatelliteWakeWordSoundSelect(device),
+            WyomingSatelliteScreenTimeoutSelect(device),
         ]
     )
 
@@ -59,7 +60,7 @@ async def async_setup_entry(
 class WyomingSatellitePipelineSelect(VASatelliteEntity, AssistPipelineSelect):
     """Pipeline selector for Wyoming satellites."""
 
-    def __init__(self, hass: HomeAssistant, device: SatelliteDevice) -> None:
+    def __init__(self, hass: HomeAssistant, device: VASatelliteDevice) -> None:
         """Initialize a pipeline selector."""
         self.device = device
 
@@ -104,7 +105,7 @@ class WyomingSatelliteNoiseSuppressionLevelSelect(
 class WyomingSatelliteVadSensitivitySelect(VASatelliteEntity, VadSensitivitySelect):
     """VAD sensitivity selector for Wyoming satellites."""
 
-    def __init__(self, hass: HomeAssistant, device: SatelliteDevice) -> None:
+    def __init__(self, hass: HomeAssistant, device: VASatelliteDevice) -> None:
         """Initialize a VAD sensitivity selector."""
         self.device = device
 

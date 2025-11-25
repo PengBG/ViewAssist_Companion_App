@@ -11,6 +11,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
 from .custom import CustomActions
+from .devices import VASatelliteDevice
 from .entity import VASatelliteEntity
 
 if TYPE_CHECKING:
@@ -24,16 +25,17 @@ async def async_setup_entry(
 ) -> None:
     """Set up switch entities."""
     item: DomainDataItem = hass.data[DOMAIN][config_entry.entry_id]
+    device: VASatelliteDevice = item.device  # type: ignore[assignment]
 
     # Setup is only forwarded for satellites
     assert item.device is not None
 
     async_add_entities(
         [
-            WyomingSatelliteWakeButton(item.device),
-            WyomingSatelliteRefreshButton(item.device),
-            WyomingScreenSleepButton(item.device),
-            WyomingScreenWakeButton(item.device),
+            WyomingSatelliteWakeButton(device),
+            WyomingSatelliteRefreshButton(device),
+            WyomingScreenSleepButton(device),
+            WyomingScreenWakeButton(device),
         ]
     )
 

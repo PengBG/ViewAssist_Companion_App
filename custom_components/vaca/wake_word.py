@@ -148,7 +148,7 @@ class WyomingWakeWordProvider(wake_word.WakeWordDetectionEntity):
                                     # Save queued audio
                                     await audio_task
                                     pending.remove(audio_task)
-                                    queued_audio = [audio_task.result()]
+                                    queued_audio = [audio_task.result()]  # pyright: ignore[reportAssignmentType]
 
                                 return wake_word.DetectionResult(
                                     wake_word_id=detection.name or "",

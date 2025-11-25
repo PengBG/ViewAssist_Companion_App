@@ -68,12 +68,10 @@ async def async_setup_entry(
     domain_data: DomainDataItem = hass.data[DOMAIN][config_entry.entry_id]
     assert domain_data.device is not None
 
+    device: VASatelliteDevice = domain_data.device  # type: ignore[assignment]
+
     async_add_entities(
-        [
-            ViewAssistSatelliteEntity(
-                hass, domain_data.service, domain_data.device, config_entry
-            )
-        ]
+        [ViewAssistSatelliteEntity(hass, domain_data.service, device, config_entry)]
     )
 
 
@@ -145,23 +143,30 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
 
         if RunSatellite().is_type(event.type):
             # integration version
-            self.device.custom_settings[
-                "integration_version"
-            ] = await getIntegrationVersion(self.hass)
-            self.device.custom_settings["min_required_apk_version"] = MIN_APK_VERSION
-            # Update url and port
-            self.device.custom_settings["ha_port"] = self.hass.config.api.port
-            self.device.custom_settings["ha_url"] = (
-                self.hass.config.internal_url if self.hass.config.internal_url else ""
-            )
-            home = getVADashboardPath(self.hass, self.device.satellite_id)
-            self.device.custom_settings["ha_dashboard"] = home.removeprefix("/")
-            # Send config event
+            if self.device and self.device.custom_settings:
+                self.device.custom_settings[
+                    "integration_version"
+                ] = await getIntegrationVersion(self.hass)
+                self.device.custom_settings["min_required_apk_version"] = (
+                    MIN_APK_VERSION
+                )
+                # Update url and port
+                self.device.custom_settings["ha_port"] = (
+                    self.hass.config.api.port if self.hass.config.api else 8123
+                )
+                self.device.custom_settings["ha_url"] = (
+                    self.hass.config.internal_url
+                    if self.hass.config.internal_url
+                    else ""
+                )
+                home = getVADashboardPath(self.hass, self.device.satellite_id)
+                self.device.custom_settings["ha_dashboard"] = home.removeprefix("/")
+                # Send config event
             self._custom_settings_changed()
 
     async def on_after_send_event_callback(self, event: Event) -> None:
         """Allow injection of events after event sent."""
-        if Describe().is_type(event.type):
+        if Describe().is_type(event.type) and self._client:
             await self._client.write_event(CustomEvent("capabilities").event())
 
     @callback
@@ -175,7 +180,7 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             # Custom event
             evt = CustomEvent.from_event(event)
 
-            if evt.event_type == CAPABILITIES_EVENT_TYPE:
+            if evt.event_type == CAPABILITIES_EVENT_TYPE and evt.event_data:
                 self.device.capabilities = evt.event_data.get("capabilities", {})
 
             elif evt.event_type == STATUS_EVENT_TYPE:
@@ -223,15 +228,16 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
         """
         if event.type == assist_pipeline.PipelineEventType.RUN_START:
             # Fix for error when running pipeline for ask question
-            if not event.data.get("tts_output"):
+            if event.data and not event.data.get("tts_output"):
                 event.data["tts_output"] = {"token": ""}
         elif event.type == assist_pipeline.PipelineEventType.RUN_END:
             # Pipeline ended
-            self.config_entry.async_create_background_task(
-                self.hass,
-                self._client.write_event(PipelineEnded().event()),
-                "send pipeline ended event",
-            )
+            if self._client is not None:
+                self.config_entry.async_create_background_task(
+                    self.hass,
+                    self._client.write_event(PipelineEnded().event()),
+                    "send pipeline ended event",
+                )
         elif event.type == assist_pipeline.PipelineEventType.STT_END:
             # Speech-to-text transcript
             if event.data:
@@ -464,7 +470,7 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
                         timestamp=timestamp,
                     )
                     await self._client.write_event(chunk.event())
-                    timestamp += chunk.seconds
+                    timestamp += int(chunk.seconds)
                     total_seconds += chunk.seconds
 
                 await self._client.write_event(AudioStop(timestamp=timestamp).event())
