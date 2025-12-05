@@ -65,7 +65,7 @@
                 "name": "Ekran parlaklığı"
             },
             "notification_volume": {
-                "name": "Ses seviyesi"
+                "name": "Konuşma ses seviyesi"
             },
             "motion_detection_sensitivity": {
                 "name": "Hareket algılama hassasiyeti"
