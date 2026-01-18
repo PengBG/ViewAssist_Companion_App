@@ -216,6 +216,12 @@
             },
             "screen_on_motion": {
                 "name": "Screen on with motion"
+            },
+            "advanced_gain": {
+                "name": "Advanced gain control"
+            },
+            "voice_enhancer": {
+                "name": "Voice enhancer"
             }
         }
     }
