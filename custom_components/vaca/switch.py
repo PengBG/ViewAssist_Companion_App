@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from config.custom_components.vaca.custom import CustomActions
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON, EntityCategory
@@ -36,6 +37,7 @@ async def async_setup_entry(
     assert device is not None
     entities = [
         WyomingSatelliteMuteSwitch(device),
+        WyomingSatelliteScreenSwitch(device),
         WyomingSatelliteSwipeToRefreshSwitch(device),
         WyomingSatelliteScreenAutoBrightnessSwitch(device),
         WyomingSatelliteScreenAlwaysOnSwitch(device),
@@ -44,6 +46,8 @@ async def async_setup_entry(
         WyomingSatelliteContinueConversationSwitch(device),
         WyomingSatelliteAlarmSwitch(device),
         WyomingSatelliteScreenOnWakeWordSwitch(device),
+        WyomingSatelliteAdvancedGainSwitch(device),
+        WyomingSatelliteVoiceEnhancerSwitch(device),
     ]
 
     if capabilities := device.capabilities:
@@ -125,6 +129,41 @@ class BaseFeedbackSwitch(BaseSwitch):
             if self.entity_description.key in settings:
                 setting_state = settings[self.entity_description.key]
                 await self.do_switch(setting_state, send_to_device=False)
+
+
+class WyomingSatelliteScreenSwitch(BaseFeedbackSwitch):
+    """Entity to control screen on/off."""
+
+    _listener_class = "status_update"
+
+    entity_description = SwitchEntityDescription(
+        key="screen_on",
+        translation_key="screen_on",
+        icon="mdi:monitor",
+    )
+    default_on = True
+
+    @property
+    def icon(self) -> str:
+        """Return the icon to use in the frontend."""
+        return "mdi:monitor" if self._attr_is_on else "mdi:monitor-off"
+
+    async def status_update(self, data: dict[str, Any]) -> None:
+        """Handle status update."""
+        if settings := data.get("sensors"):
+            if self.entity_description.key in settings:
+                setting_state = settings[self.entity_description.key]
+                await self.do_switch(setting_state, send_to_device=False)
+
+    async def do_switch(self, value: bool, send_to_device: bool = True) -> None:
+        """Perform the switch action."""
+        self._attr_is_on = value
+        self.async_write_ha_state()
+        if send_to_device:
+            if value:
+                self._device.send_custom_action(CustomActions.SCREEN_WAKE)
+            else:
+                self._device.send_custom_action(CustomActions.SCREEN_SLEEP)
 
 
 class WyomingSatelliteMuteSwitch(BaseSwitch):
@@ -302,5 +341,29 @@ class WyomingSatelliteScreenOnMotionSwitch(BaseSwitch):
         translation_key="screen_on_motion",
         icon="mdi:motion-sensor",
         entity_category=EntityCategory.CONFIG,
+    )
+    default_on = False
+
+
+class WyomingSatelliteAdvancedGainSwitch(BaseSwitch):
+    """Entity to control advanced gain setting."""
+
+    entity_description = SwitchEntityDescription(
+        key="advanced_gain",
+        translation_key="advanced_gain",
+        icon="mdi:amplifier",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    )
+    default_on = False
+
+
+class WyomingSatelliteVoiceEnhancerSwitch(BaseSwitch):
+    """Entity to control voice enhancer setting."""
+
+    entity_description = SwitchEntityDescription(
+        key="voice_enhancer",
+        translation_key="voice_enhancer",
+        icon="mdi:account-voice",
+        entity_category=EntityCategory.DIAGNOSTIC,
     )
     default_on = False

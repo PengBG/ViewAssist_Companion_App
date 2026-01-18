@@ -175,6 +175,9 @@
             "mute": {
                 "name": "Mute"
             },
+            "screen_on": {
+                "name": "Screen"
+            },
             "swipe_refresh": {
                 "name": "Swipe to refresh"
             },
@@ -213,6 +216,12 @@
             },
             "screen_on_motion": {
                 "name": "Screen on with motion"
+            },
+            "advanced_gain": {
+                "name": "Advanced gain control"
+            },
+            "voice_enhancer": {
+                "name": "Voice enhancer"
             }
         }
     }
