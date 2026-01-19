@@ -84,6 +84,9 @@
             },
             "zoom_level": {
                 "name": "Zoom level"
+            },
+            "raw_proximity_threshold": {
+              "name": "Raw proximity threshold"
             }
         },
         "select": {
