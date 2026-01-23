@@ -48,6 +48,7 @@ async def async_setup_entry(
         WyomingSatelliteScreenOnWakeWordSwitch(device),
         WyomingSatelliteAdvancedGainSwitch(device),
         WyomingSatelliteVoiceEnhancerSwitch(device),
+        WyomingSatelliteScreenSaverSwitch(device),
     ]
 
     if capabilities := device.capabilities:
@@ -101,6 +102,9 @@ class BaseSwitch(VASatelliteEntity, restore_state.RestoreEntity, SwitchEntity):
         self._attr_is_on = value
         self.async_write_ha_state()
         if send_to_device:
+            _LOGGER.debug(
+                "Setting %s to %s", self.entity_description.key, self._attr_is_on
+            )
             self._device.set_custom_setting(
                 self.entity_description.key, self._attr_is_on
             )
@@ -365,5 +369,16 @@ class WyomingSatelliteVoiceEnhancerSwitch(BaseSwitch):
         translation_key="voice_enhancer",
         icon="mdi:account-voice",
         entity_category=EntityCategory.DIAGNOSTIC,
+    )
+    default_on = False
+
+
+class WyomingSatelliteScreenSaverSwitch(BaseFeedbackSwitch):
+    """Entity to control screen saver setting."""
+
+    entity_description = SwitchEntityDescription(
+        key="screen_saver",
+        translation_key="screen_saver",
+        icon="mdi:monitor-shimmer",
     )
     default_on = False
