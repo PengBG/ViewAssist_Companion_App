@@ -50,8 +50,13 @@ async def async_setup_entry(
 
     if device.capabilities and device.capabilities.get("has_front_camera"):
         entities.append(WyomingSatelliteMotionDetectionSensitivityNumber(device))
-    if device.capabilities and device.capabilities.get("proximity_sensor_type") == "raw":
+    if (
+        device.capabilities
+        and device.capabilities.get("proximity_sensor_type") == "raw"
+    ):
         entities.append(WyomingSatelliteRawProximityThresholdNumber(device))
+    if device.supportBump():
+        entities.append(WyomingSatelliteBumpDetectionSensitivityNumber(device))
     async_add_entities(entities)
 
 
@@ -308,10 +313,40 @@ class WyomingSatelliteMotionDetectionSensitivityNumber(
         # Sensitivity is sent as 0-50 scale
         self._device.set_custom_setting(self.entity_description.key, int(value / 2))
 
- 
-class WyomingSatelliteRawProximityThresholdNumber(
-    VASatelliteEntity, RestoreNumber
-):
+
+class WyomingSatelliteBumpDetectionSensitivityNumber(VASatelliteEntity, RestoreNumber):
+    """Entity to represent bump sensitivity."""
+
+    entity_description = NumberEntityDescription(
+        key="bump_sensitivity",
+        translation_key="bump_sensitivity",
+        icon="mdi:tune-variant",
+        entity_category=EntityCategory.CONFIG,
+    )
+    _attr_should_poll = False
+    _attr_native_min_value = 0
+    _attr_native_max_value = 10
+    _attr_native_step = 1
+    _attr_native_value = 8
+
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to Home Assistant."""
+        await super().async_added_to_hass()
+
+        state = await self.async_get_last_state()
+        if state is not None:
+            await self.async_set_native_value(float(state.state))
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        value = max(0, min(self._attr_native_max_value, value))
+        self._attr_native_value = value
+        self.async_write_ha_state()
+        # Sensitivity is sent as 1-10 scale
+        self._device.set_custom_setting(self.entity_description.key, 11 - value)
+
+
+class WyomingSatelliteRawProximityThresholdNumber(VASatelliteEntity, RestoreNumber):
     """Entity to represent raw proximity threshold."""
 
     entity_description = NumberEntityDescription(
