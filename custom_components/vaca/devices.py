@@ -23,7 +23,7 @@ class VASatelliteDevice(SatelliteDevice):
     custom_settings: dict[str, Any] | None = None
     capabilities: dict[str, Any] | None = None
 
-    _custom_settings_listener: Callable[[], None] | None = None
+    _custom_settings_listener: Callable[[str | None, Any | None], None] | None = None
     _custom_action_listener: Callable[[Any, Any], None] | None = None
     stt_listener: Callable[[str], None] | None = None
     tts_listener: Callable[[str], None] | None = None
@@ -63,7 +63,7 @@ class VASatelliteDevice(SatelliteDevice):
             self.custom_settings[setting] = value
 
         if self._custom_settings_listener is not None:
-            self._custom_settings_listener()
+            self._custom_settings_listener(setting, value)
 
     @callback
     def send_custom_action(
@@ -75,7 +75,7 @@ class VASatelliteDevice(SatelliteDevice):
 
     @callback
     def set_custom_settings_listener(
-        self, custom_settings_listener: Callable[[], None]
+        self, custom_settings_listener: Callable[[str | None, Any | None], None]
     ) -> None:
         """Listen for updates to custom settings."""
         self._custom_settings_listener = custom_settings_listener

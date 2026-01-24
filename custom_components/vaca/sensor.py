@@ -16,7 +16,7 @@ from homeassistant.const import LIGHT_LUX, PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
-from homeassistant.util.dt import parse_datetime
+from homeassistant.util.dt import now, parse_datetime
 
 from .const import DOMAIN
 from .devices import VASatelliteDevice
@@ -217,10 +217,13 @@ class _WyomingSatelliteDeviceSensorBase(VASatelliteEntity, RestoreSensor):
 
     def _get_timestamp_from_string(self, timestamp_str: str) -> Any:
         """Convert timestamp string to datetime object."""
-        parsed_time = parse_datetime(timestamp_str)
-        if parsed_time:
+        if timestamp_str.startswith("1970-01-01"):
+            return None
+        if parsed_time := parse_datetime(timestamp_str):
+            if parsed_time > now(parsed_time.tzinfo):
+                return now(parsed_time.tzinfo)
             return parsed_time
-        return parse_datetime("1970-01-01T00:00:00Z")
+        return None
 
     @callback
     def status_update(self, data: dict[str, Any]) -> None:

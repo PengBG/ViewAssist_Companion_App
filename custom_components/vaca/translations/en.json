@@ -84,6 +84,12 @@
             },
             "zoom_level": {
                 "name": "Zoom level"
+            },
+            "raw_proximity_threshold": {
+              "name": "Proximity threshold"
+            },
+            "bump_sensitivity": {
+                "name": "Bump sensitivity"
             }
         },
         "select": {
@@ -222,6 +228,9 @@
             },
             "voice_enhancer": {
                 "name": "Voice enhancer"
+            },
+            "screen_saver": {
+                "name": "Screen saver"
             }
         }
     }

@@ -6,7 +6,7 @@ import asyncio
 import io
 import logging
 import time
-from typing import Final
+from typing import Any, Final
 import wave
 
 from wyoming.audio import AudioChunk, AudioStart, AudioStop
@@ -184,7 +184,7 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             if evt.event_type == CAPABILITIES_EVENT_TYPE and evt.event_data:
                 self.device.capabilities = evt.event_data.get("capabilities", {})
 
-            elif evt.event_type == STATUS_EVENT_TYPE:
+            elif evt.event_type in (STATUS_EVENT_TYPE, SETTINGS_EVENT_TYPE):
                 _LOGGER.debug(
                     "Received %s event: %s",
                     evt.event_type,
@@ -393,7 +393,9 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
             )
         )
 
-    def _custom_settings_changed(self) -> None:
+    def _custom_settings_changed(
+        self, setting: str | None = None, value: Any = None
+    ) -> None:
         """Run when device screen settings change."""
         if self._client is not None and self._client.can_write_event():
             self.config_entry.async_create_background_task(
@@ -401,7 +403,11 @@ class ViewAssistSatelliteEntity(WyomingAssistSatellite, VASatelliteEntity):
                 self._client.write_event(
                     CustomEvent(
                         SETTINGS_EVENT_TYPE,
-                        {SETTINGS_EVENT_TYPE: self.device.custom_settings},
+                        {
+                            SETTINGS_EVENT_TYPE: self.device.custom_settings
+                            if setting is None
+                            else {setting: value}
+                        },
                     ).event()
                 ),
                 "custom settings event",
